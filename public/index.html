@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Говорящая Ёлка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pangolin&family=Rubik:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <header class="hud">
+    <button class="mood" id="mood" aria-label="Настроение ёлки"><svg id="moodFace" viewBox="0 0 30 30"></svg><span><b>Ёлка</b><i id="moodTxt">весёлая</i></span></button>
+    <nav class="rooms" id="rooms" aria-label="Комнаты">
+      <button data-room="kitchen" aria-label="Кухня"><svg viewBox="0 0 28 28"><path d="M21 17Q26 15 26 10" stroke="#e23b4a" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M6 22Q4 12 14 11Q24 12 22 22Z" fill="#e23b4a"/><path d="M9 12Q14 4 19 12" stroke="#fff" stroke-width="2" fill="none"/><circle cx="14" cy="10" r="2" fill="#fff"/><circle cx="10" cy="17" r="1.4" fill="#fff"/><circle cx="16" cy="19" r="1.4" fill="#fff"/><rect x="5" y="22" width="18" height="3" rx="1.5" fill="#3a3a3a"/></svg><span>Кухня</span></button>
+      <button data-room="living" aria-label="Гостиная"><svg viewBox="0 0 28 28"><rect x="3" y="7" width="22" height="18" rx="2" fill="#f1e4cc"/><rect x="2" y="5" width="24" height="4" rx="1.5" fill="#8a5a3b"/><path d="M8 25V16Q14 10 20 16V25Z" fill="#3a1a12"/><path d="M11 24Q10 19 14 15Q18 19 17 24Z" fill="#ff9a2e"/><path d="M13 24Q12.6 21 14 19Q15.4 21 15 24Z" fill="#ffe28a"/></svg><span>Гостиная</span></button>
+      <button data-room="bedroom" aria-label="Спальня"><svg viewBox="0 0 28 28"><rect x="3" y="15" width="22" height="7" rx="2" fill="#3a7bd5"/><rect x="4" y="11" width="9" height="5" rx="2.5" fill="#fff"/><rect x="2" y="9" width="3" height="16" rx="1.5" fill="#b07a4a"/><rect x="23" y="13" width="3" height="12" rx="1.5" fill="#b07a4a"/><path d="M19 3a4 4 0 1 0 3 6a3 3 0 1 1-3-6z" fill="#f2d48a"/></svg><span>Спальня</span></button>
+    </nav>
+    <div class="meters">
+      <button class="ring" id="mW" style="--c:var(--water)" aria-label="Вода"><svg viewBox="0 0 44 44"><circle class="trk" cx="22" cy="22" r="18"/><circle class="val" id="mWater" cx="22" cy="22" r="18"/></svg><svg class="ico" viewBox="0 0 16 16"><path fill="currentColor" d="M8 1.5c2.6 3.3 4.5 5.6 4.5 8.1a4.5 4.5 0 0 1-9 0C3.5 7.1 5.4 4.8 8 1.5z"/></svg></button>
+      <button class="ring" id="mJ" style="--c:var(--joy)" aria-label="Радость"><svg viewBox="0 0 44 44"><circle class="trk" cx="22" cy="22" r="18"/><circle class="val" id="mJoy" cx="22" cy="22" r="18"/></svg><svg class="ico" viewBox="0 0 16 16"><path fill="currentColor" d="M8 14C2 10 1 6.6 2.6 4.4 4 2.6 6.6 2.8 8 4.8c1.4-2 4-2.2 5.4-.4C15 6.6 14 10 8 14z"/></svg></button>
+      <button class="ring" id="mE" style="--c:var(--sleep)" aria-label="Бодрость"><svg viewBox="0 0 44 44"><circle class="trk" cx="22" cy="22" r="18"/><circle class="val" id="mEnergy" cx="22" cy="22" r="18"/></svg><svg class="ico" viewBox="0 0 16 16"><path fill="currentColor" d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7z"/></svg></button>
+    </div>
+    <button class="icon-btn" id="sndBtn" aria-label="Звук"></button>
+  </header>
+
+  <main id="stage">
+    <svg id="scene" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs id="defs">
+        <pattern id="wp" width="32" height="32" patternUnits="userSpaceOnUse">
+          <rect width="32" height="32" fill="#6e2a33"/>
+          <path d="M16 8.5 L20 16 L16 23.5 L12 16 Z" fill="#e7ad52" opacity=".2"/>
+          <circle cx="0" cy="0" r="1.8" fill="#e7ad52" opacity=".25"/><circle cx="32" cy="0" r="1.8" fill="#e7ad52" opacity=".25"/>
+          <circle cx="0" cy="32" r="1.8" fill="#e7ad52" opacity=".25"/><circle cx="32" cy="32" r="1.8" fill="#e7ad52" opacity=".25"/>
+        </pattern>
+        <pattern id="planks" width="96" height="36" patternUnits="userSpaceOnUse">
+          <rect width="96" height="36" fill="#7a4a2c"/>
+          <rect width="96" height="5" fill="#8b5835" opacity=".6"/><rect y="18" width="96" height="5" fill="#8b5835" opacity=".6"/>
+          <rect y="17" width="96" height="1.3" fill="#4d2b17"/><rect y="35" width="96" height="1.3" fill="#4d2b17"/>
+          <rect x="62" width="1.3" height="18" fill="#4d2b17"/><rect x="18" y="18" width="1.3" height="18" fill="#4d2b17"/>
+        </pattern>
+        <pattern id="brick" width="20" height="12" patternUnits="userSpaceOnUse">
+          <rect width="20" height="12" fill="#93402d"/>
+          <path d="M0 5.6H20M0 11.6H20M10 0V5.6M0 6V12M20 6V12" stroke="#5e2416" stroke-width="1.2"/>
+        </pattern>
+        <pattern id="knit" width="8" height="6" patternUnits="userSpaceOnUse">
+          <path d="M0 0 L4 5 L8 0" fill="none" stroke="#000" stroke-opacity=".16" stroke-width="1.2"/>
+        </pattern>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1230"/><stop offset="1" stop-color="#3a4a82"/></linearGradient>
+        <linearGradient id="treeGrad" x1="0" y1="0" x2="0" y2="1"><stop id="tg1" offset="0" stop-color="#57b86b"/><stop id="tg2" offset="1" stop-color="#1d6a39"/></linearGradient>
+        <linearGradient id="curtain" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#173f33"/><stop offset=".5" stop-color="#245a49"/><stop offset="1" stop-color="#143628"/></linearGradient>
+        <radialGradient id="moonGlow"><stop offset="0" stop-color="#fff6cf" stop-opacity=".85"/><stop offset="1" stop-color="#fff6cf" stop-opacity="0"/></radialGradient>
+        <radialGradient id="warmGlow"><stop offset="0" stop-color="#ffb347" stop-opacity=".8"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+        <radialGradient id="gGold"><stop offset="0" stop-color="#ffe08a" stop-opacity=".75"/><stop offset="1" stop-color="#ffe08a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="gRed"><stop offset="0" stop-color="#ff5a6a" stop-opacity=".7"/><stop offset="1" stop-color="#ff5a6a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="gIce"><stop offset="0" stop-color="#bfe6ff" stop-opacity=".8"/><stop offset="1" stop-color="#bfe6ff" stop-opacity="0"/></radialGradient>
+        <radialGradient id="globeGlass" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset=".6" stop-color="#cfe6ff" stop-opacity=".18"/><stop offset="1" stop-color="#9cc3ea" stop-opacity=".35"/></radialGradient>
+        <radialGradient id="pearl" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#efe6f2"/><stop offset="1" stop-color="#b9a9c2"/></radialGradient>
+        <clipPath id="winClip"><rect x="25" y="64" width="112" height="214"/></clipPath>
+        <clipPath id="globeClip"><circle cx="302" cy="330" r="12.5"/></clipPath>
+        <mask id="nightMask" maskUnits="userSpaceOnUse" x="-800" y="-1000" width="2000" height="2800">
+          <rect x="-800" y="-1000" width="2000" height="2800" fill="#fff"/>
+          <rect x="25" y="78" width="112" height="214" fill="#5a5a5a"/>
+          <path d="M314 530 L314 446 Q348 418 382 446 L382 530 Z" fill="#000"/>
+        </mask>
+      </defs>
+
+      <!-- ROOM -->
+      <g id="room-living" class="room">
+        <rect x="-800" y="-1000" width="2000" height="1530" fill="url(#wp)"/>
+        <rect x="-800" y="436" width="2000" height="94" fill="#4a1c23"/>
+        <g fill="none" stroke="#5e2630" stroke-width="2">
+          <rect x="-196" y="450" width="80" height="66" rx="3"/><rect x="-100" y="450" width="80" height="66" rx="3"/>
+          <rect x="-4" y="450" width="80" height="66" rx="3"/><rect x="92" y="450" width="80" height="66" rx="3"/>
+          <rect x="188" y="450" width="80" height="66" rx="3"/><rect x="420" y="450" width="80" height="66" rx="3"/><rect x="516" y="450" width="80" height="66" rx="3"/>
+        </g>
+        <rect x="-800" y="432" width="2000" height="7" fill="#c99a5b"/>
+        <rect x="-800" y="522" width="2000" height="10" fill="#2a1215"/>
+        <rect x="-800" y="531" width="2000" height="900" fill="url(#planks)"/>
+        <rect x="-800" y="531" width="2000" height="30" fill="#000" opacity=".18"/>
+        <ellipse cx="175" cy="630" rx="188" ry="44" fill="#1f4d58"/>
+        <ellipse cx="175" cy="630" rx="176" ry="37" fill="none" stroke="#efe2c8" stroke-width="2" stroke-dasharray="6 5"/>
+        <ellipse cx="175" cy="630" rx="140" ry="26" fill="none" stroke="#c8a052" stroke-width="1.5" opacity=".7"/>
+        <rect x="-60" y="0" width="520" height="46" fill="transparent" data-hit="garland"/>
+
+        <!-- WINDOW -->
+        <g transform="translate(0 14)">
+        <rect x="0" y="47" width="166" height="6" rx="3" fill="#c99a5b"/>
+        <circle cx="2" cy="50" r="5" fill="#e7bf6c"/><circle cx="164" cy="50" r="5" fill="#e7bf6c"/>
+        <rect x="16" y="56" width="130" height="232" rx="4" fill="#f1e4cc"/>
+        <g id="windowGlass" data-hit="window" clip-path="url(#winClip)">
+          <rect x="25" y="64" width="112" height="214" fill="url(#sky)"/>
+          <g id="stars"></g>
+          <circle cx="116" cy="90" r="24" fill="url(#moonGlow)"/>
+          <circle cx="116" cy="90" r="9" fill="#fdf3c8"/>
+          <circle cx="112.5" cy="87" r="2" fill="#efe0a6"/><circle cx="119" cy="93" r="1.4" fill="#efe0a6"/>
+          <g class="slotA"><g id="winFx"></g></g>
+          <g id="city"></g>
+          <g class="slotB"><g id="sleigh" visibility="hidden" data-hit="sleigh">
+            <rect x="-8" y="-14" width="58" height="26" fill="transparent"/>
+            <g fill="#f3d27a">
+              <path d="M0 0h7l2-4 1.6.6-1.3 3.6V5h-1.2V2.4H3V5H1.8V2.4H0z"/>
+              <path d="M11 1h7l2-4 1.6.6-1.3 3.6V6h-1.2V3.4H14V6h-1.2V3.4H11z"/>
+              <path d="M28 -2h10q3 0 3-5h2q0 10-6 10H28z"/>
+              <path d="M26 5h18" stroke="#f3d27a" stroke-width="1.2"/>
+            </g>
+            <path d="M20 0L28 0" stroke="#f3d27a" stroke-width=".7"/>
+            <circle cx="35" cy="-5" r="2.6" fill="#e23b4a"/>
+          </g>
+          <g id="snowG"></g></g>
+          <path d="M25 64 l22 0 q-14 6 -22 26z M137 64 l-20 0 q12 6 20 24z M25 278 l0 -18 q8 10 26 18z M137 278 l0 -18 q-8 10 -24 18z" fill="#fff" opacity=".22"/>
+        </g>
+        <rect x="79" y="64" width="4" height="214" fill="#f1e4cc"/>
+        <rect x="25" y="150" width="112" height="4" fill="#f1e4cc"/>
+        <rect x="8" y="278" width="146" height="12" rx="2" fill="#e7d6b8"/>
+        <rect x="8" y="288" width="146" height="4" fill="#b9a382"/>
+        <path d="M-6 52 H32 Q30 150 40 228 Q24 236 30 330 H-6Z" fill="url(#curtain)"/>
+        <path d="M132 52 H168 V330 H132 Q140 236 124 228 Q134 150 132 52Z" fill="url(#curtain)"/>
+        <path d="M8 60 Q12 150 22 228 M18 60 Q22 150 32 228 M146 60 Q144 150 136 228 M156 60 Q154 150 146 228" stroke="#0e2a20" stroke-width="1.4" fill="none" opacity=".6"/>
+        <rect x="18" y="222" width="26" height="8" rx="4" fill="#d9a94e"/><rect x="120" y="222" width="26" height="8" rx="4" fill="#d9a94e"/>
+        <g data-hit="radio" id="radio">
+          <rect x="26" y="250" width="40" height="29" rx="6" fill="#8a4d2c" stroke="#5c3019" stroke-width="1.5"/>
+          <rect x="30" y="254" width="17" height="21" rx="3" fill="#d8c29b"/>
+          <g stroke="#9b815a" stroke-width="1"><path d="M31 258h15M31 262h15M31 266h15M31 270h15"/></g>
+          <circle id="radioDial" cx="57" cy="260" r="4.5" fill="#f3e5bf" stroke="#5c3019"/>
+          <circle cx="57" cy="271" r="2.6" fill="#5c3019"/>
+          <path d="M34 250 L28 236" stroke="#5c3019" stroke-width="1.5"/><circle cx="28" cy="236" r="1.6" fill="#5c3019"/>
+        </g>
+        <g data-hit="mandarin">
+          <circle cx="94" cy="266" r="6.5" fill="#f08a1c"/><circle cx="107" cy="264" r="7" fill="#f59a26"/><circle cx="120" cy="267" r="6.3" fill="#ec8318"/>
+          <circle cx="101" cy="258" r="6.3" fill="#f7a43a"/><circle cx="113" cy="257" r="6" fill="#f08a1c"/>
+          <path d="M107 252 q4 -4 8 -2 q-3 3 -8 2z" fill="#3c8d45"/>
+          <circle cx="99" cy="255" r="1.6" fill="#fff" opacity=".5"/><circle cx="105" cy="261" r="1.5" fill="#fff" opacity=".45"/>
+          <path d="M84 268 H130 Q127 280 107 280 Q87 280 84 268Z" fill="#e9f1f6" stroke="#9fb3c4" stroke-width="1"/>
+          <path d="M86 271 H128" stroke="#3a7bd5" stroke-width="1.4"/>
+        </g>
+        </g>
+
+        <g data-hit="calendar">
+          <rect x="304" y="88" width="80" height="94" rx="4" fill="#000" opacity=".25"/>
+          <rect x="300" y="84" width="80" height="94" rx="4" fill="#fffaf1"/>
+          <rect x="300" y="84" width="80" height="24" rx="4" fill="#c62d3a"/><rect x="300" y="100" width="80" height="8" fill="#c62d3a"/>
+          <text x="340" y="100" text-anchor="middle" font-family="Rubik, sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing=".6">ДО НОВОГО ГОДА</text>
+          <text id="calN" x="340" y="152" text-anchor="middle" font-family="Pangolin, cursive" font-size="42" fill="#2b1519">64</text>
+          <text id="calW" x="340" y="170" text-anchor="middle" font-family="Rubik, sans-serif" font-size="11" fill="#7a5a55">дня</text>
+          <circle cx="318" cy="84" r="3" fill="#2b1519"/><circle cx="362" cy="84" r="3" fill="#2b1519"/>
+        </g>
+
+        <g data-hit="wreath" id="wreath">
+          <g id="wreathRing"></g>
+          <path d="M337 285 q-12 -10 -14 2 q6 6 14 -2z M353 285 q12 -10 14 2 q-6 6 -14 -2z" fill="#c62d3a"/>
+          <path d="M342 287 l-6 16 l5 -2 l2 4z M348 287 l6 16 l-5 -2 l-2 4z" fill="#a8222e"/>
+          <circle cx="345" cy="285" r="4" fill="#e0414e"/>
+        </g>
+
+        <g id="fireplace">
+          <rect x="286" y="360" width="124" height="170" fill="#e9dcc6"/>
+          <rect x="286" y="360" width="124" height="170" fill="none" stroke="#c8b79a" stroke-width="2"/>
+          <rect x="302" y="410" width="94" height="120" fill="url(#brick)"/>
+          <path d="M314 530 L314 446 Q348 418 382 446 L382 530 Z" fill="#170b08"/>
+          <g data-hit="fire">
+            <path d="M314 530 L314 446 Q348 418 382 446 L382 530 Z" fill="transparent"/>
+            <rect x="322" y="514" width="52" height="9" rx="4.5" fill="#6b3a1e"/>
+            <rect x="328" y="519" width="44" height="9" rx="4.5" fill="#7d4524" transform="rotate(-6 350 523)"/>
+            <g id="fire">
+              <path class="flame" d="M332 520 Q326 496 340 474 Q342 492 350 498 Q352 480 362 466 Q372 492 366 520Z" fill="#f2711c"/>
+              <path class="flame f2" d="M337 520 Q334 502 344 488 Q347 500 352 503 Q355 492 360 484 Q366 502 361 520Z" fill="#ffb02e"/>
+              <path class="flame f3" d="M342 520 Q341 508 347 500 Q350 508 353 509 Q356 503 357 498 Q360 510 356 520Z" fill="#ffe28a"/>
+            </g>
+          </g>
+          <rect x="276" y="346" width="140" height="15" rx="3" fill="#5a3420"/>
+          <rect x="276" y="346" width="140" height="4" rx="2" fill="#7a4b2e"/>
+          <path d="M278 360 q8 8 16 0 q8 8 16 0 q8 8 16 0 q8 8 16 0 q8 8 16 0 q8 8 16 0 q8 8 16 0 q8 8 16 0" fill="#245e3a" stroke="#1a4a2c" stroke-width="5" stroke-linejoin="round"/>
+          <g fill="#e0414e"><circle cx="286" cy="364" r="2.2"/><circle cx="318" cy="364" r="2.2"/><circle cx="350" cy="364" r="2.2"/><circle cx="382" cy="364" r="2.2"/><circle cx="406" cy="363" r="2.2"/></g>
+          <g id="stockings"></g>
+          <g data-hit="globe" id="globe">
+            <path d="M290 346 L292 338 H312 L314 346Z" fill="#6b3a1e"/>
+            <circle cx="302" cy="330" r="12.5" fill="#1d3a66"/>
+            <g clip-path="url(#globeClip)">
+              <path d="M302 322 L308 336 H296Z" fill="#2f8a4e"/>
+              <rect x="290" y="336" width="24" height="10" fill="#f4f8ff"/>
+              <g id="globeFlakes"></g>
+            </g>
+            <circle cx="302" cy="330" r="12.5" fill="url(#globeGlass)" stroke="#d9ecff" stroke-width=".8"/>
+          </g>
+          <rect x="327" y="326" width="6" height="20" rx="1.5" fill="#f4ecdb"/><rect x="337" y="332" width="6" height="14" rx="1.5" fill="#f4ecdb"/>
+          <ellipse class="candle-f" cx="330" cy="321" rx="2" ry="4" fill="#ffc94a"/><ellipse class="candle-f" cx="340" cy="327" rx="2" ry="4" fill="#ffc94a"/>
+          <g data-hit="clock">
+            <path d="M362 346 V326 Q362 312 377 312 Q392 312 392 326 V346Z" fill="#7a4b2e"/>
+            <circle cx="377" cy="328" r="10" fill="#fffaf1" stroke="#d9a63a" stroke-width="2"/>
+            <line id="clkH" x1="377" y1="328" x2="377" y2="322" stroke="#2b1519" stroke-width="1.8" stroke-linecap="round"/>
+            <line id="clkM" x1="377" y1="328" x2="377" y2="320" stroke="#2b1519" stroke-width="1.1" stroke-linecap="round"/>
+            <circle cx="377" cy="328" r="1.2" fill="#2b1519"/>
+          </g>
+        </g>
+      </g>
+
+      <g id="room-kitchen" class="room" style="display:none"></g>
+      <g id="room-bedroom" class="room" style="display:none"></g>
+
+      <!-- TREE -->
+      <g id="tree">
+        <g id="treeT">
+          <rect x="161" y="552" width="28" height="60" fill="#6b3e22"/>
+          <rect x="161" y="552" width="9" height="60" fill="#83502e"/>
+          <g id="tiers" data-hit="tree"></g>
+          <g id="snowcaps" pointer-events="none"></g>
+          <g id="tinsel" pointer-events="none"></g>
+          <g id="orns" data-hit="tree"></g>
+          <g id="scarf" data-hit="tree"></g>
+          <g id="face" data-hit="face">
+            <g id="cheeks"></g>
+            <g id="eyesOpen">
+              <ellipse cx="152" cy="388" rx="13" ry="16" fill="#fff" stroke="#123a22" stroke-width="1.6"/>
+              <ellipse cx="198" cy="388" rx="13" ry="16" fill="#fff" stroke="#123a22" stroke-width="1.6"/>
+              <g id="pupL"><circle class="iris" cx="152" cy="390" r="6.8" fill="#1b1b2b"/><circle cx="154.5" cy="387" r="2.2" fill="#fff"/></g>
+              <g id="pupR"><circle class="iris" cx="198" cy="390" r="6.8" fill="#1b1b2b"/><circle cx="200.5" cy="387" r="2.2" fill="#fff"/></g>
+            </g>
+            <path id="lashes" d="" fill="none" stroke="#123a22" stroke-width="2" stroke-linecap="round"/>
+            <path id="eyeLines" d="" fill="none" stroke="#123a22" stroke-width="3" stroke-linecap="round"/>
+            <path id="brows" d="" fill="none" stroke="#123a22" stroke-width="3.2" stroke-linecap="round"/>
+            <path id="mouth" d="M161 421 Q175 435 189 421" fill="none" stroke="#3a1418" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <g id="nose"></g>
+            <g id="glasses"></g>
+          </g>
+          <g id="hat" data-hit="tree"></g>
+        </g>
+        <g id="stand" data-hit="pot"></g>
+      </g>
+      <g id="gifts"></g>
+
+      <rect id="night" x="-800" y="-1000" width="2000" height="2800" fill="#0a0f2c" style="opacity:0" mask="url(#nightMask)" pointer-events="none"/>
+
+      <g id="glow" pointer-events="none">
+        <g id="glow-living">
+        <ellipse id="fireGlow" cx="348" cy="505" rx="110" ry="70" fill="url(#warmGlow)" opacity=".3"/>
+        <circle cx="330" cy="321" r="12" fill="url(#warmGlow)" opacity=".7"/><circle cx="340" cy="327" r="12" fill="url(#warmGlow)" opacity=".7"/>
+        <g id="wallLights"></g>
+        <g id="winLights"></g>
+        </g>
+        <g id="glow-kitchen" style="display:none"></g>
+        <g id="glow-bedroom" style="display:none"></g>
+        <g id="treeGlow"><g id="lights"></g><g id="topper"></g><g id="glints"></g></g>
+      </g>
+      <g id="fx" pointer-events="none">
+        <g id="can" opacity="0">
+          <g id="canBody">
+            <path d="M-36 -14 L-12 2" stroke="#3f8ccf" stroke-width="5" stroke-linecap="round"/>
+            <ellipse cx="-37" cy="-15" rx="3.2" ry="5" fill="#2c6aa3" transform="rotate(-35 -37 -15)"/>
+            <rect x="-16" y="-14" width="34" height="30" rx="7" fill="#56a6e6" stroke="#2c6aa3" stroke-width="1.6"/>
+            <path d="M16 -8 Q30 -10 26 6 Q24 14 16 12" fill="none" stroke="#2c6aa3" stroke-width="4"/>
+            <rect x="-16" y="-2" width="34" height="5" fill="#f2bd4b"/>
+            <rect x="-8" y="-18" width="20" height="5" rx="2" fill="#2c6aa3"/>
+          </g>
+        </g>
+      </g>
+    </svg>
+    <div id="bubble" hidden></div>
+    <div class="roomtag" id="roomTag" hidden></div>
+  </main>
+
+  <section class="sheet" id="sheet" hidden>
+    <div class="grab" id="grab" aria-hidden="true"></div>
+    <div class="sh-head" id="shHead"></div>
+    <div class="sh-body" id="shBody"></div>
+  </section>
+
+  <nav class="dock" id="dock">
+    <button data-dock="decor" style="--bc:#ff6f9f"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><circle cx="12" cy="14.5" r="6.5"/><path d="M10 8V5.5h4V8M12 5.5V3"/><path d="M6.3 12.6c3.4 1.4 8 1.4 11.4 0" stroke-linecap="round"/></svg></span>Наряд</button>
+    <button data-dock="water" style="--bc:#45a6ff"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3c3.6 4.6 6 7.7 6 11a6 6 0 0 1-12 0c0-3.3 2.4-6.4 6-11z"/><path d="M9 14.5a3 3 0 0 0 3 3" stroke-linecap="round"/></svg></span>Полить</button>
+    <button data-dock="say" style="--bc:#ff9f2e"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h-1A.5.5 0 0 1 4 15.5z"/><path d="M8.5 10h.01M12 10h.01M15.5 10h.01" stroke-width="2.8" stroke-linecap="round"/></svg></span>Скажи</button>
+    <button data-dock="games" style="--bc:#35b864"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 8h10a4 4 0 0 1 4 4v1.5a3 3 0 0 1-5.4 1.8L14.5 14h-5l-1.1 1.3A3 3 0 0 1 3 13.5V12a4 4 0 0 1 4-4z"/><path d="M8 10.5v3M6.5 12h3" stroke-linecap="round"/><path d="M15.5 11.3h.01M17.6 12.7h.01" stroke-width="2.6" stroke-linecap="round"/></svg></span>Игры</button>
+    <button data-dock="night" id="nightBtn" style="--bc:#8b78ff"></button>
+  </nav>
+
+  <div id="toast" hidden></div>
+
+  <div id="game" hidden>
+    <canvas id="gBg"></canvas>
+    <div class="g-top">
+      <button class="icon-btn" id="gClose" aria-label="Выйти из игры"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <h2 id="gTitle">Игра</h2>
+      <div id="gScore"></div>
+    </div>
+    <div id="gArea"></div>
+    <div id="gResult" hidden></div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
