@@ -729,6 +729,119 @@ const projStars = [];
   }
 })();
 
+/* ---------------- DECOR ---------------- */
+// side walls only show on wide screens; one small piece per room sits in the strip phones see too.
+// every item is data-hit="decor" and the tree says one of its data-say lines (split on |)
+defs.insertAdjacentHTML('beforeend', `<linearGradient id="samGold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a8741a"/><stop offset=".4" stop-color="#f2cf6e"/><stop offset="1" stop-color="#9a6a18"/></linearGradient>`);
+(function buildDecor() {
+  seed = 7;
+  const item = (say, body) => `<g data-hit="decor" data-say="${say}">${body}</g>`;
+  // framed picture; inner art is drawn in a 100x70 box
+  const pic = (x, y, w, h, art, say) => item(say, `<rect x="${x + 3}" y="${y + 4}" width="${w}" height="${h}" rx="2" fill="#000" opacity=".22"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="#c99a5b" stroke="#8a5a1e" stroke-width="1.5"/><path d="M${x + 3} ${y + 3}h${w - 6}" stroke="#f2d48a" stroke-width="1.2" opacity=".7"/><svg x="${x + 7}" y="${y + 7}" width="${w - 14}" height="${h - 14}" viewBox="0 0 100 70" preserveAspectRatio="xMidYMid slice">${art}</svg>`);
+  // child's crayon drawing taped to the wall, art in a 54x44 box; rotation sits on an inner <g> so the hop animation keeps it
+  const drawing = (x, y, rot, art, say) => item(say, `<g transform="rotate(${rot} ${x + 27} ${y + 22})"><rect x="${x + 2}" y="${y + 3}" width="54" height="44" fill="#000" opacity=".2"/><rect x="${x}" y="${y}" width="54" height="44" fill="#fffdf6"/><svg x="${x}" y="${y}" width="54" height="44" viewBox="0 0 54 44">${art}</svg><rect x="${x + 19}" y="${y - 4}" width="16" height="8" fill="#f2e6b8" opacity=".8"/></g>`);
+  const books = (x, y, x1, cols) => {
+    let s = '', i = 0;
+    while (x < x1 - 6) {
+      const w = 6 + srnd() * 5, h = 18 + srnd() * 12;
+      s += `<rect x="${x.toFixed(1)}" y="${(y - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="1" fill="${cols[i++ % cols.length]}"/><path d="M${(x + 1).toFixed(1)} ${(y - h + 4).toFixed(1)}h${(w - 2).toFixed(1)}M${(x + 1).toFixed(1)} ${(y - 4).toFixed(1)}h${(w - 2).toFixed(1)}" stroke="#fff" stroke-opacity=".45"/>`;
+      x += w + .8;
+    }
+    return s;
+  };
+  const fir = (x, y, s) => `<path d="M${x} ${y - s * 2.4}L${x + s} ${y}H${x - s}Z" fill="#1f4f36"/><path d="M${x} ${y - s * 2.4}L${x + s * .4} ${y - s * 1.4}Q${x} ${y - s * 1.6} ${x - s * .4} ${y - s * 1.4}Z" fill="#fff"/>`;
+  const BOOKCOL = ['#c62d3a', '#2f5fa8', '#2f8a4e', '#e2ae45', '#7d3fb8', '#e2702a', '#3a7bd5'];
+
+  /* living room */
+  const forest = `<rect width="100" height="70" fill="#9cc0e6"/><rect y="26" width="100" height="16" fill="#f6d2b0"/><circle cx="72" cy="34" r="8" fill="#fff1c4"/>
+    <path d="M0 46Q25 34 50 42T100 38V70H0Z" fill="#dfe8f5"/>${fir(12, 50, 5)}${fir(22, 48, 6)}${fir(84, 46, 5)}${fir(92, 47, 4)}
+    <path d="M0 56Q30 46 60 54T100 50V70H0Z" fill="#fff"/>${fir(40, 60, 6)}${fir(52, 62, 4.5)}<path d="M62 70Q70 60 92 58" stroke="#b9d3ee" stroke-width="3" fill="none"/>`;
+  const finch = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="7" fill="#5d6b7a"/><circle cx="${x + 1}" cy="${y + 2}" r="6" fill="#e2513f"/><circle cx="${x + 7}" cy="${y - 6}" r="5" fill="#1a1a1a"/><path d="M${x + 11} ${y - 6}l4 1.5-4 1.5z" fill="#2b2b2b"/><path d="M${x - 8} ${y - 1}l-9 3 9 2z" fill="#1a1a1a"/>`;
+  const finches = `<rect width="100" height="70" fill="#dbe9f5"/><path d="M0 46Q40 36 100 42M60 40l14 -12" stroke="#6b3e22" stroke-width="3" fill="none"/>${finch(32, 36)}${finch(66, 32)}
+    <g fill="#fff">${[[10, 12], [24, 58], [50, 14], [84, 20], [90, 60], [44, 62]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.6"/>`).join('')}</g><path d="M0 46Q40 36 100 42" stroke="#fff" stroke-width="1.4" fill="none"/>`;
+  const house = (x, w, h, c) => `<rect x="${x}" y="${56 - h}" width="${w}" height="${h}" fill="${c}"/><path d="M${x - 3} ${57 - h}L${x + w / 2} ${44 - h}L${x + w + 3} ${57 - h}Z" fill="#f4f8ff"/><rect x="${x + w / 2 - 3}" y="${62 - h}" width="6" height="6" fill="#ffd98a"/>`;
+  const village = `<rect width="100" height="70" fill="#1b2a5a"/><g fill="#fff">${[[8, 8], [30, 16], [52, 6], [70, 14], [92, 8], [84, 24]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".9"/>`).join('')}</g>
+    <path d="M60 4a9 9 0 1 0 6 15a7 7 0 1 1 -6 -15z" fill="#fdf3c8"/>${house(14, 22, 18, '#8a5a3b')}${house(48, 18, 14, '#c62d3a')}${house(76, 16, 12, '#6b3e22')}<path d="M0 54Q50 46 100 54V70H0Z" fill="#f4f8ff"/>`;
+  $('#room-living').insertAdjacentHTML('beforeend', `
+  ${item('Это мой портрет, когда я была маленькой шишкой!|Правда, я тут хорошенькая?', `<path d="M234 76l-12 10M234 76l12 10" stroke="#8a5a1e"/><circle cx="234" cy="76" r="2" fill="#e7bf6c"/>
+    <ellipse cx="236" cy="117" rx="24" ry="30" fill="#000" opacity=".2"/><ellipse cx="234" cy="114" rx="24" ry="30" fill="#d9a63a" stroke="#8a5a1e" stroke-width="1.5"/><ellipse cx="234" cy="114" rx="18" ry="24" fill="#f3e3c3"/>
+    <path d="M234 98L242 112H226Z M234 105L245 124H223Z" fill="#2f8a4e"/><rect x="231" y="124" width="6" height="5" fill="#7a4b2e"/><circle cx="231" cy="113" r="1" fill="#2b1519"/><circle cx="237" cy="113" r="1" fill="#2b1519"/><path d="M231.5 117q2.5 2 5 0" stroke="#2b1519" fill="none"/><path transform="translate(234 96)" d="${starPath(3.4, 1.4)}" fill="#f2bd4b"/>`)}
+  ${pic(-196, 96, 150, 110, forest, 'Зимний лес — там я родилась!|Где-то там растут мои сестрички')}
+  <rect x="-204" y="300" width="160" height="7" rx="2" fill="#5a3420"/><path d="M-190 307l8 10M-58 307l-8 10" stroke="#5a3420" stroke-width="3"/>
+  ${item('Сказки! Почитаешь мне «Морозко»?|Тут все книжки про зиму и Новый год', books(-198, 300, -132, BOOKCOL) + `<rect x="-130" y="272" width="9" height="28" rx="1" fill="#c62d3a" transform="rotate(18 -121 300)"/>`)}
+  ${item('Веточки пахнут хвоей — почти как я!', `<g stroke="#2f8a4e" stroke-width="2" fill="none"><path d="M-110 282Q-116 262 -124 252M-110 282Q-108 260 -98 250M-110 282Q-112 266 -110 246"/></g><g fill="#e0414e"><circle cx="-123" cy="256" r="2.2"/><circle cx="-100" cy="254" r="2.2"/><circle cx="-110" cy="250" r="2.2"/></g><path d="M-118 300Q-124 288 -116 280H-104Q-96 288 -102 300Z" fill="#3a7bd5"/><path d="M-120 290h20" stroke="#fff" stroke-dasharray="2 2"/>`)}
+  ${item('Это мы с Дедом Морозом!', `<rect x="-90" y="272" width="30" height="28" rx="2" fill="#e7bf6c"/><rect x="-86" y="276" width="22" height="20" fill="#9cc0e6"/><path d="M-86 296V290Q-75 284 -64 290V296Z" fill="#fff"/><path d="M-80 292L-77 282L-74 292Z" fill="#2f8a4e"/><circle cx="-70" cy="285" r="3" fill="#c62d3a"/><path d="M-72 286q2 5 4 0" fill="#fff"/>`)}
+  <ellipse cx="-36" cy="602" rx="18" ry="4" fill="#000" opacity=".25"/><circle cx="-36" cy="380" r="58" fill="url(#warmGlow)" opacity=".35"/>
+  ${item('Торшер! Светит тепло, как камин', `<path d="M-36 600V372" stroke="#3a2416" stroke-width="3"/><ellipse cx="-36" cy="600" rx="14" ry="4" fill="#3a2416"/><path d="M-58 374L-48 340H-24L-14 374Z" fill="#e9c27a" stroke="#c99a5b"/><path d="M-58 374h44" stroke="#c62d3a" stroke-width="3" stroke-dasharray="2 2"/>`)}
+  ${item('Кресло для чтения сказок', `<ellipse cx="-138" cy="608" rx="66" ry="7" fill="#000" opacity=".22"/><rect x="-190" y="470" width="104" height="90" rx="24" fill="#2f6a5a"/><path d="M-174 482v64M-156 482v64M-138 482v64M-120 482v64M-102 482v64" stroke="#245446" stroke-width="2"/>
+    <path d="M-176 474H-128V560L-136 554L-144 560L-152 554L-160 560L-168 554L-176 560Z" fill="url(#ging)" opacity=".9"/>
+    <rect x="-184" y="548" width="92" height="36" rx="10" fill="#337766"/><rect x="-208" y="520" width="30" height="72" rx="13" fill="#285a4c"/><rect x="-98" y="520" width="30" height="72" rx="13" fill="#285a4c"/>
+    <rect x="-200" y="590" width="7" height="16" rx="2" fill="#3a2416"/><rect x="-83" y="590" width="7" height="16" rx="2" fill="#3a2416"/>`)}
+  ${item('Мурр… Это кошка Мурка|Тише, Мурка задремала', `<path d="M-160 552Q-176 548 -170 536Q-166 530 -158 538" stroke="#d98a40" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="-140" cy="545" rx="22" ry="10" fill="#e8a35a"/><path d="M-150 538q2 6 0 14M-140 536q2 6 0 16M-130 537q2 6 0 14" stroke="#c97a30" stroke-width="2" fill="none"/>
+    <circle cx="-120" cy="539" r="8.5" fill="#e8a35a"/><path d="M-127 534l1 -9 6 5zM-113 534l-1 -9 -6 5z" fill="#e8a35a"/><path d="M-125 539q2 2 4 0M-119 539q2 2 4 0" stroke="#2b1519" fill="none"/><circle cx="-120" cy="542.5" r="1" fill="#e0707a"/>`)}
+  ${pic(440, 104, 92, 74, finches, 'Снегири прилетели!|Красногрудые снегири — зимние птички')}
+  ${item('Это Мурка в молодости', `<ellipse cx="571" cy="145" rx="24" ry="30" fill="#000" opacity=".2"/><ellipse cx="568" cy="141" rx="24" ry="30" fill="#d9a63a" stroke="#8a5a1e" stroke-width="1.5"/><ellipse cx="568" cy="141" rx="18" ry="24" fill="#6f8fb8"/>
+    <circle cx="568" cy="142" r="10" fill="#e8a35a"/><path d="M559 137l1 -10 7 6zM577 137l-1 -10 -7 6z" fill="#e8a35a"/><ellipse cx="568" cy="162" rx="12" ry="8" fill="#e8a35a"/><circle cx="564" cy="141" r="1.6" fill="#2b1519"/><circle cx="572" cy="141" r="1.6" fill="#2b1519"/><path d="M566 146q2 2 4 0" stroke="#2b1519" fill="none"/><path d="M561 154q7 4 14 0" stroke="#c62d3a" stroke-width="2.4" fill="none"/>`)}
+  ${pic(452, 196, 124, 70, village, 'Деревня ночью — все уже наряжают ёлки|Видишь огоньки в окошках?')}
+  ${item('Сколько книжек! И цветок, и глобус', `<ellipse cx="530" cy="606" rx="66" ry="6" fill="#000" opacity=".22"/><rect x="466" y="296" width="128" height="10" rx="2" fill="#5a3420"/><rect x="470" y="304" width="120" height="300" fill="#7a4b2e"/><rect x="478" y="312" width="104" height="284" fill="#3a2416"/>
+    ${[380, 452, 524, 596].map(y => `<rect x="478" y="${y}" width="104" height="6" fill="#7a4b2e"/>`).join('')}
+    ${books(480, 380, 580, BOOKCOL)}${books(480, 452, 548, BOOKCOL.slice(2))}<path d="M556 452l6 -22 8 2 -6 22z" fill="#e2ae45"/>${books(480, 524, 520, BOOKCOL.slice(4))}<path d="M534 524Q530 508 544 504Q560 506 556 524Z" fill="#f2c14e"/><circle cx="545" cy="502" r="5" fill="#f2c14e"/>${books(480, 596, 580, BOOKCOL.slice(1))}
+    <path d="M486 296l4 -16h20l4 16z" fill="#c9653a"/><g fill="#3f8a4a"><ellipse cx="492" cy="270" rx="5" ry="11" transform="rotate(-30 492 270)"/><ellipse cx="508" cy="268" rx="5" ry="12" transform="rotate(30 508 268)"/><ellipse cx="500" cy="262" rx="5" ry="13"/></g>
+    <path d="M556 296l4 -6h12l4 6z" fill="#7a4b2e"/><circle cx="566" cy="278" r="12" fill="#3a7bd5"/><path d="M558 272q6 -4 8 2t6 4M560 284q4 -2 8 2" stroke="#4fa86a" stroke-width="3" fill="none"/><path d="M566 264a14 14 0 0 1 0 28" stroke="#c99a2e" stroke-width="1.6" fill="none"/>`)}`);
+
+  /* kitchen */
+  const gzhel = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff" stroke="#2f5fa8" stroke-width="${r * .14}"/><circle cx="${cx}" cy="${cy}" r="${r * .62}" fill="none" stroke="#2f5fa8" stroke-width=".8"/>${[0, 72, 144, 216, 288].map(a => `<ellipse cx="${cx}" cy="${cy - r * .32}" rx="${r * .16}" ry="${r * .3}" fill="#2f5fa8" transform="rotate(${a} ${cx} ${cy})"/>`).join('')}<circle cx="${cx}" cy="${cy}" r="${r * .14}" fill="#fff" stroke="#2f5fa8"/>`;
+  const khokhloma = (cx, cy, r) => `<circle cx="${cx + 2}" cy="${cy + 3}" r="${r}" fill="#000" opacity=".2"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a1a1a" stroke="#d9a63a" stroke-width="3"/><path d="M${cx - r * .6} ${cy + r * .3}Q${cx} ${cy - r * .5} ${cx + r * .6} ${cy + r * .2}" stroke="#d9a63a" stroke-width="2" fill="none"/>
+    ${[[-.3, -.15], [0, -.32], [.3, -.12]].map(([dx, dy]) => `<circle cx="${cx + dx * r}" cy="${cy + dy * r}" r="${r * .14}" fill="#e23b3b"/>`).join('')}<ellipse cx="${cx - r * .35}" cy="${cy + r * .32}" rx="${r * .2}" ry="${r * .09}" fill="#d9a63a" transform="rotate(-30 ${cx - r * .35} ${cy + r * .32})"/><ellipse cx="${cx + r * .4}" cy="${cy + r * .3}" rx="${r * .2}" ry="${r * .09}" fill="#d9a63a" transform="rotate(30 ${cx + r * .4} ${cy + r * .3})"/>`;
+  $('#room-kitchen').insertAdjacentHTML('beforeend', `
+  ${item('Тарелка из Гжели — бело-синяя!', `<circle cx="152" cy="84" r="1.8" fill="#8a5a3b"/><circle cx="153" cy="106" r="19" fill="#000" opacity=".15"/>${gzhel(151, 104, 19)}`)}
+  <rect x="-204" y="214" width="160" height="7" rx="2" fill="#8a5a3b"/><path d="M-196 196h144" stroke="#8a5a3b" stroke-width="2"/>
+  ${item('Гжель — посуда бело-синяя, как зимний узор', [-182, -150, -118, -86].map((x, i) => gzhel(x, 199, i % 2 ? 13 : 15)).join(''))}
+  ${item('Чашки в горошек — для чая с вареньем!', [-176, -144, -112, -80].map((x, i) => `<path d="M${x} 221v5" stroke="#6b3e22"/><path d="M${x - 7} 226h14v9q0 6 -7 6q-7 0 -7 -6z" fill="${['#c62d3a', '#2f5fa8', '#e2ae45', '#2f8a4e'][i]}"/><path d="M${x + 7} 229q5 0 5 4t-5 4" stroke="${['#c62d3a', '#2f5fa8', '#e2ae45', '#2f8a4e'][i]}" stroke-width="1.8" fill="none"/><circle cx="${x - 3}" cy="232" r="1.2" fill="#fff"/><circle cx="${x + 2}" cy="236" r="1.2" fill="#fff"/>`).join(''))}
+  ${item('Баранки! Хрум-хрум!|Бублики к чаю', `<circle cx="-24" cy="120" r="2" fill="#8a5a3b"/><path d="M-24 120V262" stroke="#c9a27d" stroke-width="1.2"/>${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => `<circle cx="${-24 + (i % 2 ? 3 : -3)}" cy="${142 + i * 14}" r="7" fill="none" stroke="#c98a3e" stroke-width="5"/><circle cx="${-24 + (i % 2 ? 3 : -3)}" cy="${137 + i * 14}" r=".9" fill="#fff6dc"/>`).join('')}`)}
+  ${item('Самовар! Будем пить чай с баранками|Пых-пых — самовар закипает', `<ellipse cx="-120" cy="436" rx="22" ry="3" fill="#000" opacity=".2"/><path d="M-136 436L-132 426H-108L-104 436Z" fill="#a8741a"/><rect x="-127" y="417" width="14" height="10" fill="#c9922a"/>
+    <path d="M-146 418Q-152 380 -138 366H-102Q-88 380 -94 418Z" fill="url(#samGold)"/><path d="M-148 382q-10 0 -10 10q0 8 8 8M-92 382q10 0 10 10q0 8 -8 8" stroke="#6b4512" stroke-width="3" fill="none"/>
+    <g fill="#fff6c8" opacity=".85">${[-132, -124, -116, -108].map(x => `<circle cx="${x}" cy="384" r="2.4"/>`).join('')}</g><path d="M-120 402h-14v6h4" stroke="#6b4512" stroke-width="3" fill="none"/><circle cx="-120" cy="400" r="2" fill="#6b4512"/>
+    <rect x="-130" y="358" width="20" height="9" rx="2" fill="#c9922a"/><path d="M-131 358Q-133 342 -120 340Q-107 342 -109 358Z" fill="#f4f7fb" stroke="#2f5fa8"/><path d="M-110 350q6 -2 8 -8" stroke="#f4f7fb" stroke-width="3" fill="none"/><circle cx="-120" cy="338" r="2" fill="#2f5fa8"/><path d="M-125 350q5 -4 10 0q-5 4 -10 0z" fill="#2f5fa8"/>`)}
+  ${item('Бабушкины огурчики!', `<rect x="-192" y="398" width="30" height="38" rx="6" fill="#bfe0c8" opacity=".85" stroke="#8fb89a"/><rect x="-194" y="392" width="34" height="8" rx="2" fill="url(#ging)" stroke="#d24a4a" stroke-width=".8"/>${[[-184, 418, -10], [-174, 412, 12], [-180, 428, 80], [-170, 426, -20]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="3.5" ry="9" fill="#4f8a3a" transform="rotate(${r} ${x} ${y})"/>`).join('')}<path d="M-186 404q4 6 0 12" stroke="#6faa52" stroke-width="2" fill="none"/>`)}
+  ${item('Хохлома — золото на чёрном!|Расписные тарелочки', khokhloma(446, 148, 19) + khokhloma(496, 140, 25) + khokhloma(546, 148, 19))}
+  <rect x="424" y="264" width="170" height="6" rx="2" fill="#8a5a3b"/>
+  ${item('Специи: корица, гвоздика, ваниль — пахнет праздником!', ['#c97a30', '#7a3a1a', '#e2ae45', '#c62d3a', '#4f8a3a', '#f4ecdb', '#9a5a2a'].map((c, i) => `<rect x="${432 + i * 22}" y="242" width="16" height="22" rx="3" fill="${c}" stroke="#fff" stroke-opacity=".5"/><rect x="${431 + i * 22}" y="238" width="18" height="6" rx="2" fill="#3a3a3a"/><rect x="${435 + i * 22}" y="250" width="10" height="7" fill="#fffaf1"/>`).join(''))}
+  <rect x="428" y="324" width="164" height="3" rx="1.5" fill="url(#chrome)"/>
+  ${item('Половник, лопатка и венчик — всё для пирогов!', `<path d="M446 326V368" stroke="#9aa3ad" stroke-width="3"/><path d="M436 368a10 8 0 0 0 20 0z" fill="#9aa3ad"/>
+    <path d="M482 326V362" stroke="#8a5a3b" stroke-width="4"/><rect x="474" y="360" width="16" height="22" rx="3" fill="#8a5a3b"/>
+    <path d="M518 326V352" stroke="#9aa3ad" stroke-width="3"/><path d="M518 352q-10 14 0 30q10 -16 0 -30M518 352q-4 14 0 30q4 -16 0 -30" stroke="#9aa3ad" fill="none" stroke-width="1.4"/>
+    <path d="M556 326V346" stroke="#c62d3a" stroke-width="3"/><circle cx="556" cy="356" r="10" fill="none" stroke="#c62d3a" stroke-width="3"/><path d="M549 356h14M556 349v14" stroke="#c62d3a" stroke-width="1.2"/>`)}
+  ${item('Свежий хлебушек!', `<rect x="448" y="428" width="74" height="8" rx="3" fill="#c9965a"/><path d="M522 432h10" stroke="#c9965a" stroke-width="4" stroke-linecap="round"/><path d="M454 430Q452 410 484 408Q516 410 514 430Z" fill="#c9823e"/><path d="M466 418l6 -6M480 416l6 -6M494 418l6 -6" stroke="#f2cf8e" stroke-width="2" stroke-linecap="round"/>`)}
+  ${item('Базилик на окошке растёт', `<path d="M562 436l-4 -20h28l-4 20z" fill="#c9653a"/><rect x="556" y="414" width="32" height="5" rx="2" fill="#b0552e"/><g fill="#4f9a5c">${[[566, 404, -30], [574, 398, 0], [582, 404, 30], [570, 392, -15], [578, 392, 15]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="9" transform="rotate(${r} ${x} ${y})"/>`).join('')}</g>`)}`);
+
+  /* bedroom */
+  const fox = `<rect width="100" height="70" fill="#14204a"/><g fill="#fff">${[[10, 10], [26, 22], [44, 8], [60, 18], [92, 30], [14, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1"/>`).join('')}</g><circle cx="80" cy="16" r="9" fill="#fdf3c8"/>
+    <path d="M0 48Q50 38 100 48V70H0Z" fill="#e8eef8"/>${fir(14, 46, 5)}${fir(90, 46, 6)}
+    <ellipse cx="66" cy="52" rx="14" ry="6" fill="#e2702a"/><circle cx="76" cy="54" r="3" fill="#fff"/><ellipse cx="50" cy="50" rx="16" ry="9" fill="#e2702a"/><circle cx="38" cy="48" r="7" fill="#e2702a"/><path d="M33 44l1 -7 4 4zM41 42l3 -6 2 6z" fill="#e2702a"/><path d="M34 48q2 1.4 4 0M39 48q2 1.4 4 0" stroke="#2b1519" fill="none"/><ellipse cx="36" cy="52" rx="4" ry="2" fill="#fff"/>`;
+  const matr = (cx, by, s, c) => `<ellipse cx="${cx}" cy="${by - 10 * s}" rx="${9 * s}" ry="${11 * s}" fill="${c}"/><circle cx="${cx}" cy="${by - 23 * s}" r="${7 * s}" fill="${c}"/><circle cx="${cx}" cy="${by - 22.5 * s}" r="${4.4 * s}" fill="#f8e2c8"/><circle cx="${cx - 1.8 * s}" cy="${by - 23 * s}" r="${.6 * s}" fill="#2b1519"/><circle cx="${cx + 1.8 * s}" cy="${by - 23 * s}" r="${.6 * s}" fill="#2b1519"/><circle cx="${cx - 2.6 * s}" cy="${by - 21 * s}" r="${1 * s}" fill="#ff8a8a"/><circle cx="${cx + 2.6 * s}" cy="${by - 21 * s}" r="${1 * s}" fill="#ff8a8a"/><ellipse cx="${cx}" cy="${by - 8 * s}" rx="${5.5 * s}" ry="${7 * s}" fill="#fff6dc"/><circle cx="${cx}" cy="${by - 9 * s}" r="${2.4 * s}" fill="#e23b4a"/><circle cx="${cx}" cy="${by - 9 * s}" r="${1 * s}" fill="#f2c14e"/>`;
+  $('#room-bedroom').insertAdjacentHTML('beforeend', `
+  ${drawing(-4, 66, -5, `<circle cx="10" cy="9" r="5" fill="#f2c14e"/><path d="M10 1v-2M18 9h2M16 3l2 -2M2 9h-2" stroke="#f2c14e" stroke-width="1.4"/><path d="M30 34L38 14L46 34Z" fill="#4fa86a" stroke="#2f8a4e"/><path d="M38 14l-1 -4 2 0z" fill="#e23b4a"/><circle cx="35" cy="26" r="1.4" fill="#e23b4a"/><circle cx="41" cy="30" r="1.4" fill="#3a7bd5"/><path d="M36 22q2 2 4 0" stroke="#2b1519" fill="none"/>
+    <circle cx="18" cy="28" r="5" fill="#b98448"/><circle cx="14" cy="23" r="2" fill="#b98448"/><circle cx="22" cy="23" r="2" fill="#b98448"/><ellipse cx="18" cy="37" rx="6" ry="5" fill="#b98448"/><path d="M0 41h54" stroke="#4fa86a" stroke-width="2"/>`, 'Это я и мишка! Красиво?|Рисунок цветными карандашами')}
+  ${pic(-192, 112, 136, 96, fox, 'Лисичка спит под луной — и нам пора!|Сладких снов, лисичка')}
+  <rect x="-204" y="320" width="160" height="7" rx="2" fill="#8a5a3b"/><path d="M-190 327l8 10M-58 327l-8 10" stroke="#6b3e22" stroke-width="3"/>
+  ${item('Книжки с картинками!', books(-198, 320, -150, ['#f2c14e', '#3a7bd5', '#e23b4a', '#4fa86a']) + `<rect x="-146" y="290" width="26" height="30" rx="2" fill="#7d3fb8" transform="rotate(10 -120 320)"/><path transform="translate(-136 302) rotate(10)" d="${starPath(5, 2)}" fill="#f2c14e"/>`)}
+  ${item('Ракета! Полетим к звёздам?', `<path d="M-94 320l-6 -8v-12l6 4zM-74 320l6 -8v-12l-6 4z" fill="#e23b4a"/><path d="M-84 268Q-72 282 -74 316H-94Q-96 282 -84 268Z" fill="#f4f8ff" stroke="#9fb3c4"/><circle cx="-84" cy="294" r="5" fill="#6fb6ff" stroke="#3a7bd5" stroke-width="1.6"/><path d="M-84 268Q-78 274 -77 280H-91Q-90 274 -84 268Z" fill="#e23b4a"/>`)}
+  ${item('Лошадка-качалка! Иго-го!|Покачай лошадку', `<ellipse cx="-110" cy="606" rx="46" ry="5" fill="#000" opacity=".2"/><path d="M-152 594Q-110 614 -66 594" stroke="#8a5a3b" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M-134 598L-130 566M-120 602L-122 566M-100 602L-98 566M-86 598L-90 566" stroke="#f4ecdb" stroke-width="5" stroke-linecap="round"/>
+    <path d="M-136 556Q-150 560 -148 576" stroke="#e23b4a" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="-110" cy="560" rx="28" ry="13" fill="#f4ecdb"/>
+    <path d="M-94 556L-86 528Q-82 520 -72 522L-62 532Q-62 538 -70 538L-80 540L-84 562Z" fill="#f4ecdb"/><path d="M-90 554L-84 528Q-82 522 -78 520" stroke="#e23b4a" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="-74" cy="528" r="1.6" fill="#2b1519"/><path d="M-120 548Q-110 542 -100 548V556H-120Z" fill="#3a7bd5"/><g fill="#9fb3c4"><circle cx="-128" cy="566" r="2"/><circle cx="-96" cy="568" r="2"/><circle cx="-112" cy="570" r="2"/></g>`)}
+  ${item('Будильник! Утром разбудит: дзинь!', `<rect x="408" y="540" width="62" height="7" rx="2" fill="#6b3e22"/><rect x="412" y="546" width="54" height="58" fill="#8a5a3b"/><rect x="417" y="554" width="44" height="18" rx="2" fill="none" stroke="#6b3e22" stroke-width="1.5"/><circle cx="439" cy="563" r="2.2" fill="#f2c14e"/>
+    <path d="M422 520a5 5 0 0 1 9 -3M444 517a5 5 0 0 1 9 3" fill="#e23b4a"/><circle cx="437" cy="529" r="11" fill="#e23b4a"/><circle cx="437" cy="529" r="8" fill="#fffaf1"/><path d="M437 529V524M437 529l3 2" stroke="#2b1519" stroke-width="1.2" stroke-linecap="round"/><path d="M429 538l-3 3M445 538l3 3" stroke="#2b1519" stroke-width="1.6"/>
+    <rect x="450" y="532" width="16" height="4" fill="#3a7bd5"/><rect x="452" y="528" width="13" height="4" fill="#f2c14e"/>`)}
+  ${drawing(444, 156, 6, `<rect x="10" y="20" width="18" height="16" fill="#e23b4a"/><path d="M7 21L19 9L31 21Z" fill="#7a4b2e"/><rect x="16" y="26" width="6" height="10" fill="#f2c14e"/><circle cx="44" cy="10" r="6" fill="#f2c14e"/><path d="M0 38q27 -6 54 0" stroke="#3a7bd5" stroke-width="2" fill="none"/>`, 'Домик с солнышком — красота!')}
+  ${drawing(520, 168, -7, `<path d="M8 40L16 6L24 40Z M30 40L38 12L46 40Z" fill="#4fa86a"/><g fill="#fff">${[[6, 6], [28, 10], [48, 4], [20, 26], [44, 30]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.6" stroke="#9fb3c4" stroke-width=".6"/>`).join('')}</g><path d="M0 42h54" stroke="#9fb3c4" stroke-width="2"/>`, 'Снежный лес! Похоже на мой дом')}
+  <rect x="466" y="340" width="136" height="7" rx="2" fill="#8a5a3b"/><path d="M478 347l8 10M590 347l-8 10" stroke="#6b3e22" stroke-width="3"/>
+  ${item('Матрёшки! Одна в другой прячется|Пять сестричек-матрёшек', [[486, 1.1, '#e23b4a'], [516, .95, '#2f8a4e'], [542, .82, '#3a7bd5'], [564, .68, '#f2a12e'], [582, .55, '#e23b4a']].map(([x, s, c]) => matr(x, 340, s, c)).join(''))}
+  ${item('Кубики: А, Б, В!', [[520, 582, '#e23b4a', 'А'], [544, 582, '#3a7bd5', 'Б'], [532, 560, '#f2c14e', 'В']].map(([x, y, c, t]) => `<rect x="${x}" y="${y}" width="22" height="22" rx="3" fill="${c}" stroke="#000" stroke-opacity=".15"/><text x="${x + 11}" y="${y + 16.5}" text-anchor="middle" font-family="Rubik, sans-serif" font-size="14" font-weight="800" fill="#fff">${t}</text>`).join(''))}`);
+})();
+
 /* ---------------- FACE & MOTION ---------------- */
 const MOUTH = {
   smile: ['M161 421 Q175 435 189 421', 0], happy: ['M160 418 Q175 446 190 418 Q175 424 160 418Z', 1], laugh: ['M157 414 Q175 456 193 414 Q175 420 157 414Z', 1],
@@ -1306,6 +1419,7 @@ function roomHit(hit, el) {
       break;
     case 'teddy': restart(el, 'hop'); tone(900, .12, 'sine', .2, 0, 1400); tone(1400, .15, 'sine', .15, .12, 900); joy(2); burst('heart', 30, 140, 5, { parent: '#fx', vy: -60, g: 20 }); say(pick(['Это мой мишка!', 'Мишка, спокойной ночи!']), { silent: true }); break;
     case 'wardrobe': $('#wardrobe').classList.add('open'); tone(210, .45, 'sawtooth', .03, 0, 140); setTimeout(() => { tab = 'acc'; if (sheet === 'decor') renderSheet(true); else openSheet('decor'); }, 380); say('Что наденем?', { silent: true }); break;
+    case 'decor': restart(el, 'hop'); SFX.pop(); say(pick(el.dataset.say.split('|')), { silent: true }); break;
     case 'slippers': restart(el, 'hop'); SFX.pop(); say('Тапочки-зайчики! Жаль, у меня нет ножек', { silent: true }); break;
   }
 }
